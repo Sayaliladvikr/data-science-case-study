@@ -1,0 +1,63 @@
+#Analysis and Visualization of Forest Fires in India (2017–2019)
+  
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+data = pd.read_excel("datafile.xlsx")
+
+print(data.head())
+
+
+data.columns = ["State", "2017", "2018", "2019"]
+
+total_by_year = data[["2017", "2018", "2019"]].sum()
+print("Total Fires per Year:\n", total_by_year)
+
+
+plt.figure(figsize=(8, 5))
+total_by_year.plot(kind='bar', color='orangered')
+plt.title("Total Forest Fires in India by Year")
+plt.ylabel("Number of Fires")
+plt.xlabel("Year")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+data["Total"] = data[["2017", "2018", "2019"]].sum(axis=1)
+top_states = data.sort_values("Total", ascending=False).head(10)
+print("Top 10 Affected States:\n", top_states[["State", "Total"]])
+
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x="Total", y="State", data=top_states, palette="Reds_r")
+plt.title("Top 10 Most Affected States (2017–2019)")
+plt.xlabel("Total Fires")
+plt.ylabel("State")
+plt.tight_layout()
+plt.show()
+
+key_states = top_states["State"].values
+trend_data = data[data["State"].isin(key_states)].set_index("State").T
+trend_data.columns.name = None
+
+plt.figure(figsize=(12, 6))
+for state in trend_data.columns:
+    plt.plot(trend_data.index, trend_data[state], label=state)
+
+plt.title("Forest Fire Trends in Top Affected States (2017–2019)")
+plt.xlabel("Year")
+plt.ylabel("Number of Fires")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(12, 10))
+heatmap_data = data.set_index("State")[["2017", "2018", "2019"]]
+sns.heatmap(heatmap_data, cmap="YlOrRd", linewidths=0.5, annot=True, fmt="d")
+plt.title("Heatmap of Forest Fires (State-wise)")
+plt.tight_layout()
+plt.show()
